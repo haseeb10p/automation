@@ -1,0 +1,10 @@
+:source:/usr/local
+/etc/*
+:package:apt/mlocate
+:package:apt/nginx-full
+:package:apt/nginx
+:package:apt/nginx-common
+:package:apt/supervisor
+:service:sysvinit/nginx
+:service:upstart/example
+:service:upstart/rabbitmq-server
