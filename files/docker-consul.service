@@ -1,0 +1,39 @@
+# This file is managed by Puppet and local changes
+# may be overwritten
+
+[Unit]
+Description=Daemon for consul
+After=docker.service
+Wants=
+Requires=docker.service
+
+[Service]
+Restart=on-failure
+StartLimitInterval=20
+StartLimitBurst=5
+TimeoutStartSec=0
+RestartSec=5
+Environment="HOME=/root"
+SyslogIdentifier=docker-consul
+ExecStartPre=-/usr/bin/docker kill consul
+ExecStartPre=-/usr/bin/docker rm  consul
+
+ExecStart=/usr/bin/docker run \
+        --net bridge -m 0b -p 8500:8500 \
+ -p 8500:8500/udp \
+ -p 8301:8301 \
+ -p 8301:8301/udp \
+ -p 8300:8300 \
+ -p 8300:8300/udp \
+ -v /var/lib/consul:/consul/data:rw \
+ -v /etc/consul:/consul/config:rw \
+  \
+        --name consul \
+        consul:0.7.3 \
+         agent -server -bootstrap-expect=1 -client=0.0.0.0 -advertise=10.0.0.100 -node=10.0.0.100 -join 10.0.0.100
+
+ExecStop=-/usr/bin/docker stop --time=0 consul
+ExecStop=-/usr/bin/docker rm  consul
+
+[Install]
+WantedBy=multi-user.target

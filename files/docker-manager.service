@@ -1,0 +1,32 @@
+# This file is managed by Puppet and local changes
+# may be overwritten
+
+[Unit]
+Description=Daemon for manager
+After=docker.service
+Wants=
+Requires=docker.service
+
+[Service]
+Restart=on-failure
+StartLimitInterval=20
+StartLimitBurst=5
+TimeoutStartSec=0
+RestartSec=5
+Environment="HOME=/root"
+SyslogIdentifier=docker-manager
+ExecStartPre=-/usr/bin/docker kill manager
+ExecStartPre=-/usr/bin/docker rm  manager
+
+ExecStart=/usr/bin/docker run \
+        --net bridge -m 0b -p 4000:4000 \
+  \
+        --name manager \
+        swarm \
+         manage -H :4000 --strategy binpack --replication --advertise 10.0.0.100:4000 --cluster-opt swarm.overcommit=-0.062 consul://10.0.0.100:8500
+
+ExecStop=-/usr/bin/docker stop --time=0 manager
+ExecStop=-/usr/bin/docker rm  manager
+
+[Install]
+WantedBy=multi-user.target
